@@ -184,9 +184,9 @@ public class Docker implements Closeable {
             listener.getLogger().println("Failed to remove docker container "+container);
     }
 
-    public String runDetached(String image, String workdir, Map<String, String> volumes, Map<Integer, Integer> ports, Map<String, String> links, EnvVars environment, Set sensitiveBuildVariables, String net, String memory, String cpu, String... command) throws IOException, InterruptedException {
+    public String runDetached(String initImage, String image, String workdir, Map<String, String> volumes, Map<Integer, Integer> ports, Map<String, String> links, EnvVars environment, Set sensitiveBuildVariables, String net, String memory, String cpu, String... command) throws IOException, InterruptedException {
 
-        String docker0 = getDocker0Ip(launcher, image);
+        String docker0 = getDocker0Ip(launcher, initImage, image);
 
 
         ArgumentListBuilder args = dockerCommand()
@@ -250,7 +250,7 @@ public class Docker implements Closeable {
         return container;
     }
 
-    private String getDocker0Ip(Launcher launcher, String image) throws IOException, InterruptedException {
+    private String getDocker0Ip(Launcher launcher, String initImage, String image) throws IOException, InterruptedException {
 
         // On some distributions, docker doesn't start docker0 bridge until a container do require it
         // So let's run the container once, running /bin/true so it terminates immediately
@@ -259,7 +259,7 @@ public class Docker implements Closeable {
                 .add("run", "--rm")
                 .add("--entrypoint")
                 .add("/bin/true")
-                .add("alpine:3.6");
+                .add(initImage);
 
         int status = launcher.launch()
                 .envs(getEnvVars())
@@ -290,7 +290,7 @@ public class Docker implements Closeable {
                 .add("run", "--tty", "--rm")
                 .add("--entrypoint")
                 .add("/sbin/ip")
-                .add("alpine:3.6")
+                .add(initImage)
                 .add("route");
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();

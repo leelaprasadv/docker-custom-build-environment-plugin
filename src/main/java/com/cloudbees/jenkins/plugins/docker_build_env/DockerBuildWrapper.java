@@ -47,6 +47,8 @@ import static org.apache.commons.lang.StringUtils.isEmpty;
  */
 public class DockerBuildWrapper extends BuildWrapper {
 
+    private final String initImage;
+
     private final DockerImageSelector selector;
 
     private final String dockerInstallation;
@@ -76,10 +78,11 @@ public class DockerBuildWrapper extends BuildWrapper {
     private final boolean noCache;
 
     @DataBoundConstructor
-    public DockerBuildWrapper(DockerImageSelector selector, String dockerInstallation, DockerServerEndpoint dockerHost, String dockerRegistryCredentials, boolean verbose, boolean privileged,
+    public DockerBuildWrapper(String initImage, DockerImageSelector selector, String dockerInstallation, DockerServerEndpoint dockerHost, String dockerRegistryCredentials, boolean verbose, boolean privileged,
                               List<Volume> volumes, String group, String command,
                               boolean forcePull,
                               String net, String memory, String cpu, boolean noCache) {
+        this.initImage = initImage.trim();
         this.selector = selector;
         this.dockerInstallation = dockerInstallation;
         this.dockerHost = dockerHost;
@@ -94,6 +97,10 @@ public class DockerBuildWrapper extends BuildWrapper {
         this.memory = memory;
         this.cpu = cpu;
         this.noCache = noCache;
+    }
+
+    public String getInitImage() {
+        return initImage;
     }
 
     public DockerImageSelector getSelector() {
@@ -189,7 +196,7 @@ public class DockerBuildWrapper extends BuildWrapper {
                 }
             }
 
-            runInContainer.container = startBuildContainer(runInContainer, build, listener);
+            runInContainer.container = startBuildContainer(runInContainer, build, listener, initImage);
             listener.getLogger().println("Docker container " + runInContainer.container + " started to host the build");
         }
 
@@ -206,7 +213,7 @@ public class DockerBuildWrapper extends BuildWrapper {
 
 
 
-    private String startBuildContainer(BuiltInContainer runInContainer, AbstractBuild build, BuildListener listener) throws IOException {
+    private String startBuildContainer(BuiltInContainer runInContainer, AbstractBuild build, BuildListener listener, String initImage) throws IOException {
         try {
             EnvVars environment = buildContainerEnvironment(build, listener);
 
@@ -216,7 +223,7 @@ public class DockerBuildWrapper extends BuildWrapper {
 
             String[] command = this.command.length() > 0 ? this.command.split(" ") : new String[0];
 
-            return runInContainer.getDocker().runDetached(runInContainer.image, workdir,
+            return runInContainer.getDocker().runDetached(initImage, runInContainer.image, workdir,
                     runInContainer.getVolumes(build), runInContainer.getPortsMap(), links,
                     environment, build.getSensitiveBuildVariables(), net, memory, cpu,
                     command); // Command expected to hung until killed

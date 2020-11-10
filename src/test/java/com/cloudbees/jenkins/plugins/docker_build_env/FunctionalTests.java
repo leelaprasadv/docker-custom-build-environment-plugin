@@ -31,7 +31,7 @@ public class FunctionalTests {
         FreeStyleProject project = jenkins.createFreeStyleProject();
 
         project.getBuildWrappersList().add(
-            new DockerBuildWrapper(
+            new DockerBuildWrapper("alpine:3.6",
                 new PullDockerImageSelector("ubuntu:14.04"),
                 "", new DockerServerEndpoint("", ""), "", true, false, Collections.<Volume>emptyList(), null, "cat", false, "bridge", null, null, false)
         );
@@ -50,7 +50,7 @@ public class FunctionalTests {
         project.setScm(new SingleFileSCM("Dockerfile", "FROM ubuntu:14.04"));
 
         project.getBuildWrappersList().add(
-                new DockerBuildWrapper(
+                new DockerBuildWrapper("alpine:3.6",
                         new DockerfileImageSelector(".", "Dockerfile"),
                         "", new DockerServerEndpoint("", ""), "", true, false, Collections.<Volume>emptyList(), null, "cat", false, "bridge", null, null, true)
         );
@@ -75,7 +75,7 @@ public class FunctionalTests {
         project.setScm(new SingleFileSCM("Dockerfile", dockerfile));
 
         project.getBuildWrappersList().add(
-                new DockerBuildWrapper(
+                new DockerBuildWrapper("alpine:3.6",
                         new DockerfileImageSelector(".", "Dockerfile"),
                         "", new DockerServerEndpoint("", ""), "", true, false, Collections.<Volume>emptyList(), null, "cat", false, "bridge", null, null, true)
         );

@@ -25,6 +25,9 @@ THE SOFTWARE.
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:st="jelly:stapler" xmlns:d="/lib/docker/commons" xmlns:c="/lib/credentials">
     <f:nested>
+        <f:entry field="initImage" title="Init image">
+            <f:textbox default="alpine:3.6"/>
+        </f:entry>
         <f:entry title="Docker image to use">
             <f:hetero-radio field="selector" descriptors="${descriptor.selectors()}" />
         </f:entry>
